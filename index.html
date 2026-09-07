@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Расписание 9-Г 50 школы</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 16px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #0b0f17;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ===== Анимированный фон-сетка ===== */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            background-image:
+                linear-gradient(90deg, rgba(60, 100, 200, 0.08) 1px, transparent 1px),
+                linear-gradient(0deg, rgba(60, 100, 200, 0.06) 1px, transparent 1px);
+            background-size: 60px 60px;
+            background-position: 0 0;
+            animation: gridMove 12s linear infinite;
+            pointer-events: none;
+        }
+
+        .grid-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(90deg, rgba(120, 160, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(0deg, rgba(120, 160, 255, 0.03) 1px, transparent 1px);
+            background-size: 120px 120px;
+            background-position: 0 0;
+            animation: gridMove 18s linear infinite reverse;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 120px 120px; }
+        }
+
+        /* ===== Контейнер ===== */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            width: 100%;
+            background: rgba(18, 25, 40, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 32px 24px 36px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #a0c4ff, #7a9eff, #b388ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .sub {
+            font-size: 15px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+        }
+
+        .header .accent-line {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #4f7df3, #8b6cf7);
+            border-radius: 4px;
+            margin: 10px auto 0;
+        }
+
+        .days-nav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 4px 0 18px 0;
+            margin-bottom: 12px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .days-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .day-btn {
+            flex: 0 0 auto;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 60px;
+            font-size: 15px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(4px);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            touch-action: manipulation;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            letter-spacing: 0.2px;
+        }
+
+        .day-btn:active {
+            transform: scale(0.94);
+        }
+
+        .day-btn.active {
+            background: linear-gradient(135deg, #4f7df3, #8b6cf7);
+            color: white;
+            box-shadow: 0 8px 24px rgba(79, 125, 243, 0.30);
+            border-color: transparent;
+        }
+
+        .schedule-box {
+            background: rgba(12, 18, 30, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 28px;
+            padding: 24px 20px 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+            min-height: 200px;
+            transition: all 0.3s;
+        }
+
+        .schedule-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .schedule-title .day-number {
+            font-size: 14px;
+            font-weight: 500;
+            color: #7a9eff;
+            background: rgba(79, 125, 243, 0.12);
+            padding: 2px 12px;
+            border-radius: 30px;
+            margin-left: 4px;
+        }
+
+        .lesson-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .lesson-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px 18px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #4f7df3;
+            transition: all 0.15s;
+        }
+
+        .lesson-number {
+            font-weight: 600;
+            color: #7a9eff;
+            min-width: 32px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .lesson-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .lesson-name {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 17px;
+            line-height: 1.3;
+        }
+
+        .lesson-place {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.45);
+            background: rgba(79, 125, 243, 0.06);
+            padding: 4px 14px;
+            border-radius: 30px;
+            display: inline-block;
+            align-self: flex-start;
+            margin-top: 2px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            border: 1px solid rgba(79, 125, 243, 0.06);
+        }
+
+        .empty-message {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 17px;
+            padding: 40px 10px;
+            background: rgba(255,255,255,0.01);
+            border-radius: 24px;
+            border: 1px dashed rgba(255,255,255,0.04);
+        }
+
+        @media (max-width: 420px) {
+            .container {
+                padding: 24px 14px 28px;
+            }
+            .header h1 {
+                font-size: 26px;
+            }
+            .day-btn {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+            .lesson-item {
+                padding: 14px 14px;
+                gap: 12px;
+            }
+            .lesson-name {
+                font-size: 16px;
+            }
+            .lesson-place {
+                font-size: 12px;
+                padding: 3px 10px;
+            }
+        }
+
+        .lesson-item {
+            animation: fadeUp 0.4s ease forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .lesson-item:nth-child(1) { animation-delay: 0.02s; }
+        .lesson-item:nth-child(2) { animation-delay: 0.06s; }
+        .lesson-item:nth-child(3) { animation-delay: 0.10s; }
+        .lesson-item:nth-child(4) { animation-delay: 0.14s; }
+        .lesson-item:nth-child(5) { animation-delay: 0.18s; }
+        .lesson-item:nth-child(6) { animation-delay: 0.22s; }
+        .lesson-item:nth-child(7) { animation-delay: 0.26s; }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grid-bg"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Расписание 9-Г</h1>
+            <div class="sub">Школа №50 · 2026</div>
+            <div class="accent-line"></div>
+        </div>
+
+        <nav class="days-nav" id="daysNav">
+            <button class="day-btn" data-day="monday">Пн</button>
+            <button class="day-btn" data-day="tuesday">Вт</button>
+            <button class="day-btn" data-day="wednesday">Ср</button>
+            <button class="day-btn" data-day="thursday">Чт</button>
+            <button class="day-btn" data-day="friday">Пт</button>
+        </nav>
+
+        <div class="schedule-box" id="scheduleBox">
+            <div class="schedule-title" id="dayTitle"></div>
+            <div id="scheduleContent"></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const scheduleData = {
+                monday: {
+                    dayName: 'Понедельник',
+                    lessons: [
+                        { name: 'Разговоры о важном', place: 'кабинет в мастерской' },
+                        { name: 'Алгебра', place: 'кабинет 209' },
+                        { name: 'Физика', place: 'кабинет 311' },
+                        { name: 'История', place: 'кабинет в мастерской' },
+                        { name: 'Русский', place: 'кабинет 206' },
+                        { name: 'География', place: 'кабинет 305' },
+                        { name: 'Физра', place: 'спортзал / улица' }
+                    ]
+                },
+                tuesday: {
+                    dayName: 'Вторник',
+                    lessons: [
+                        { name: 'Алгебра', place: 'кабинет 209' },
+                        { name: 'Литература', place: 'кабинет 206' },
+                        { name: 'Русский', place: 'кабинет 206' },
+                        { name: 'Труд', place: 'Не указан' },
+                        { name: 'Английский', place: 'кабинет 218/211' },
+                        { name: 'Биология', place: 'Не указан' },
+                        { name: 'История', place: 'кабинет в мастерской' }
+                    ]
+                },
+                wednesday: { dayName: 'Среда', lessons: null },
+                thursday: { dayName: 'Четверг', lessons: null },
+                friday: { dayName: 'Пятница', lessons: null }
+            };
+
+            const nav = document.getElementById('daysNav');
+            const dayTitle = document.getElementById('dayTitle');
+            const scheduleContent = document.getElementById('scheduleContent');
+
+            function renderSchedule(dayKey) {
+                const data = scheduleData[dayKey];
+                if (!data) return;
+                dayTitle.innerHTML = `${data.dayName} <span class="day-number">${data.lessons ? data.lessons.length + ' уроков' : ''}</span>`;
+
+                if (data.lessons && data.lessons.length > 0) {
+                    let html = '<div class="lesson-list">';
+                    data.lessons.forEach((lesson, index) => {
+                        html += `
+                            <div class="lesson-item">
+                                <span class="lesson-number">${index + 1}</span>
+                                <div class="lesson-info">
+                                    <span class="lesson-name">${lesson.name}</span>
+                                    <span class="lesson-place">${lesson.place}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    scheduleContent.innerHTML = html;
+                } else {
+                    scheduleContent.innerHTML = `
+                        <div class="empty-message">
+                            Расписание пока не указано, ожидайте, скоро появится.
+                        </div>
+                    `;
+                }
+            }
+
+            // Снимаем активность со всех кнопок и очищаем контент (на случай, если JS уже выполнился)
+            document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+            dayTitle.innerHTML = '';
+            scheduleContent.innerHTML = '';
+
+            nav.addEventListener('click', function(e) {
+                const btn = e.target.closest('.day-btn');
+                if (!btn) return;
+
+                document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const day = btn.dataset.day;
+                if (day) {
+                    renderSchedule(day);
+                }
+            });
+        })();
+    </script>
+
+</body>
+</html>
